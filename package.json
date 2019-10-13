@@ -1,0 +1,22 @@
+{
+  "name": "hooverd",
+  "version": "1.0.0",
+  "description": "A simple server for Arweave transaction signing and dispatch.",
+  "main": "hooverd.js",
+  "dependencies": {
+    "arweave": "^1.4.1",
+    "yargs": "^14.2.0",
+    "concat-stream": "^2.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node hooverd --wallet-file PATH_TO_WALLET.json"
+  },
+  "keywords": [
+    "arweave",
+    "dweb",
+    "signing"
+  ],
+  "author": "samcamwilliams",
+  "license": "GPL-2.0-only"
+}
