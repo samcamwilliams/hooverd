@@ -43,8 +43,10 @@ async function handleRequest(request, response) {
     request.on('data', function (data) { dataString += data })
     request.on('end', async function () {
         // Rudimentary endpoint router.
-        if(request.url == "/" || request == "/json" || request == "/tx")
+        if(request.url == "/" || request == "/json")
             handleJSONRequest(request, dataString, response)
+        else if(request.url == "/tx")
+            handleCompatRequest(request, dataString, response)
         else if(request.url == "/raw")
             handleRawRequest(request, dataString, response)
         else {
@@ -60,6 +62,7 @@ async function handleJSONRequest(_request, dataString, response) {
 
     // Extract the tags in {TagName: TagValue} format, for now.
     // NOTE: This is not directly compatible with normal Arweave transactions.
+    req.tags = req.tags ? req.tags : []
     req.tags.forEach(tag => {
         let key = Object.keys(tag)
         tx.addTag(key, tag[key])
@@ -68,20 +71,44 @@ async function handleJSONRequest(_request, dataString, response) {
     dispatchTX(tx, response)
 }
 
+async function handleCompatRequest(_request, dataString, response) {
+    let req = JSON.parse(dataString)
+    let tx = await arweave.createTransaction({ data: req.data }, wallet)
+
+    req.tags = req.tags ? req.tags : []
+    req.tags.forEach(tag => {
+        tx.addTag(tag.name, tag.value)
+    })
+
+    dispatchTX(tx, response)
+}
+
 async function handleRawRequest(request, dataString, response) {
-    let tx = await arweave.createTransaction({ data: dataString }, wallet)
+    let headers = request.headers
+    let header_keys = Object.keys(headers)
+    let txData = arweave.utils.stringToBuffer(dataString)
+
+    if(headers["x-encrypt-for"]) {
+        // TODO: Encrypt the data for a wallet's private key.
+        console.log("WARN: Encrypting data for a private key is not yet supported.")
+        return;
+        //txData = await arweave.crypto.encrypt(txData, wallet)
+    }
+
+    if(headers["x-encrypt-with"])
+        txData = await arweave.crypto.encrypt(txData, headers["x-encrypt-with"])
+
+    let tx = await arweave.createTransaction({ data: txData }, wallet)
 
     // Extract tags from the headers.
     // Tags should be in the format: "x-tag-TAG_NAME: TAG_VALE".
-    let headers = request.headers
-    let header_keys = Object.keys(headers)
 
     header_keys.forEach(key => {
         if(key.startsWith("x-tag-"))
             tx.addTag(key.split("x-tag-")[1], headers[key])
     })
 
-    dispatchTX(tx, response) 
+    dispatchTX(tx, response)
 }
 
 async function dispatchTX(tx, response) {
