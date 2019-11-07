@@ -1,6 +1,6 @@
 {
   "name": "hooverd",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple server for Arweave transaction signing and dispatch.",
   "main": "hooverd.js",
   "dependencies": {
