@@ -127,7 +127,9 @@ async function dispatchTX(tx, response) {
     response.end(output + "\n")
 }
 
-async function startServer() {
+module.exports = async function startServer() {
+    console.log("Welcome to hooverd! 👋\n\nWe are...")
+    
     // Print introductory information to the console.
     console.log(`...starting a server at http://localhost:${port}.`)
 
@@ -152,5 +154,3 @@ async function startServer() {
 
 }
 
-console.log("Welcome to hooverd! 👋\n\nWe are...")
-startServer()

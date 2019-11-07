@@ -17,6 +17,9 @@
     "dweb",
     "signing"
   ],
+  "bin": {
+    "hooverd": "hooverd"
+  },
   "author": "samcamwilliams",
   "license": "GPL-2.0-only"
 }
